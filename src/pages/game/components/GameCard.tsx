@@ -1,35 +1,35 @@
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import CardHeader from "@mui/material/CardHeader";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemText from "@mui/material/ListItemText";
-import Avatar from "@mui/material/Avatar";
-import PersonIcon from "@mui/icons-material/Person";
-import LanguageIcon from "@mui/icons-material/Language";
-import CardActionArea from "@mui/material/CardActionArea";
-import imageGame from "./../../../assets/foto.png";
-import type { Game } from "../../../types/Game";
-import { red } from "@mui/material/colors";
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardMedia from '@mui/material/CardMedia'
+import CardHeader from '@mui/material/CardHeader'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemAvatar from '@mui/material/ListItemAvatar'
+import ListItemText from '@mui/material/ListItemText'
+import Avatar from '@mui/material/Avatar'
+import PersonIcon from '@mui/icons-material/Person'
+import LanguageIcon from '@mui/icons-material/Language'
+import CardActionArea from '@mui/material/CardActionArea'
+import imageGame from './../../../assets/foto.png'
+import type { Game } from '../../../types/Game'
+import { red } from '@mui/material/colors'
 
 interface GameCardProps {
   game: Game;
 }
 
-export default function GameCard(props: GameCardProps) {
-  const { title, age, category, author } = props.game;
+export default function GameCard (props: GameCardProps) {
+  const { title, age, category, author } = props.game
   return (
     <Card sx={{ maxWidth: 265 }}>
       <CardHeader
         sx={{
-          ".MuiCardHeader-title": {
-            fontSize: "20px",
-          },
+          '.MuiCardHeader-title': {
+            fontSize: '20px'
+          }
         }}
         avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="age">
+          <Avatar sx={{ bgcolor: red[500] }} aria-label='age'>
             +{age}
           </Avatar>
         }
@@ -38,13 +38,13 @@ export default function GameCard(props: GameCardProps) {
       />
       <CardActionArea>
         <CardMedia
-          component="img"
-          height="140"
+          component='img'
+          height='140'
           image={imageGame}
-          alt="game image"
+          alt='game image'
         />
         <CardContent>
-          <List dense={true}>
+          <List dense>
             <ListItem>
               <ListItemAvatar>
                 <Avatar>
@@ -65,5 +65,5 @@ export default function GameCard(props: GameCardProps) {
         </CardContent>
       </CardActionArea>
     </Card>
-  );
+  )
 }

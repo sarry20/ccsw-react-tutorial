@@ -1,189 +1,188 @@
-import { useEffect, useState, useContext } from "react";
-import Button from "@mui/material/Button";
-import TableHead from "@mui/material/TableHead";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableFooter from "@mui/material/TableFooter";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import IconButton from "@mui/material/IconButton";
-import EditIcon from "@mui/icons-material/Edit";
-import ClearIcon from "@mui/icons-material/Clear";
-import styles from "./Loan.module.css";
-import CreateLoan from "./components/CreateLoan";
-import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { useAppDispatch } from "../../redux/hooks";
-import { setMessage } from "../../redux/features/manageSlice";
-import type { BackError } from "../../types/appTypes";
-import type { Loan as LoanModel } from "../../types/Loan";
+import { useEffect, useState, useContext } from 'react'
+import Button from '@mui/material/Button'
+import TableHead from '@mui/material/TableHead'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableFooter from '@mui/material/TableFooter'
+import TablePagination from '@mui/material/TablePagination'
+import TableRow from '@mui/material/TableRow'
+import Paper from '@mui/material/Paper'
+import IconButton from '@mui/material/IconButton'
+import EditIcon from '@mui/icons-material/Edit'
+import ClearIcon from '@mui/icons-material/Clear'
+import styles from './Loan.module.css'
+import CreateLoan from './components/CreateLoan'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
+import { useAppDispatch } from '../../redux/hooks'
+import { setMessage } from '../../redux/features/manageSlice'
+import type { BackError } from '../../types/appTypes'
+import type { Loan as LoanModel } from '../../types/Loan'
 import {
   useDeleteLoanMutation,
   useGetLoansQuery,
   useCreateLoanMutation,
   useUpdateLoanMutation,
   useGetClientsQuery,
-  useGetGamesQuery,
-} from "../../redux/services/ludotecaApi";
-import { LoaderContext } from "../../context/LoaderProvider";
-import { AlertDialog } from "../../components/AlertDialog";
-import { FormControl, TextField, MenuItem } from "@mui/material";
-import type { Category } from "../../types/Category";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
+  useGetGamesQuery
+} from '../../redux/services/ludotecaApi'
+import { LoaderContext } from '../../context/LoaderProvider'
+import { AlertDialog } from '../../components/AlertDialog'
+import { FormControl, TextField, MenuItem } from '@mui/material'
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs'
 
 export const Loan = () => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  const [titleFilter, setTitleFilter] = useState("");
-  const [clientFilter, setClientFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState<dayjs.Dayjs | null>(null);
+  const [pageNumber, setPageNumber] = useState(0)
+  const [pageSize, setPageSize] = useState(5)
+  const [titleFilter, setTitleFilter] = useState('')
+  const [clientFilter, setClientFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState<dayjs.Dayjs | null>(null)
 
-  const [total, setTotal] = useState(0);
-  const [loans, setLoans] = useState<LoanModel[]>([]);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [idToDelete, setIdToDelete] = useState("");
-  const [loanToUpdate, setLoanToUpdate] = useState<LoanModel | null>(null);
-  const [open, setOpen] = useState(false);
+  const [total, setTotal] = useState(0)
+  const [loans, setLoans] = useState<LoanModel[]>([])
+  const [openCreate, setOpenCreate] = useState(false)
+  const [idToDelete, setIdToDelete] = useState('')
+  const [loanToUpdate, setLoanToUpdate] = useState<LoanModel | null>(null)
+  const [open, setOpen] = useState(false)
   const [text, setText] = useState(
-    "Se ha producido un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.",
-  );
+    'Se ha producido un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.'
+  )
 
-  const dispatch = useAppDispatch();
-  const loader = useContext(LoaderContext);
+  const dispatch = useAppDispatch()
+  const loader = useContext(LoaderContext)
 
   const handleChangePage = (
     _event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number,
+    newPage: number
   ) => {
-    setPageNumber(newPage);
-  };
+    setPageNumber(newPage)
+  }
 
   const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setPageNumber(0);
-    setPageSize(parseInt(event.target.value, 10));
-  };
+    setPageNumber(0)
+    setPageSize(parseInt(event.target.value, 10))
+  }
 
   const { data, error, isLoading } = useGetLoansQuery({
     pageNumber,
     pageSize,
     title: titleFilter,
     client: clientFilter,
-    date: dateFilter ? dateFilter.toDate().toISOString() : undefined,
-  });
+    date: dateFilter ? dateFilter.toDate().toISOString() : undefined
+  })
 
-  const { data: clients } = useGetClientsQuery(null);
+  const { data: clients } = useGetClientsQuery(null)
 
   const { data: games } = useGetGamesQuery({
-    title: "",
-    idCategory: "",
-  });
+    title: '',
+    idCategory: ''
+  })
 
   const [deleteLoanApi, { isLoading: isLoadingDelete, error: errorDelete }] =
-    useDeleteLoanMutation();
+    useDeleteLoanMutation()
 
   const [createLoanApi, { isLoading: isLoadingCreate }] =
-    useCreateLoanMutation();
+    useCreateLoanMutation()
 
   const [updateLoanApi, { isLoading: isLoadingUpdate }] =
-    useUpdateLoanMutation();
+    useUpdateLoanMutation()
 
   useEffect(() => {
     loader.showLoading(
-      isLoadingCreate || isLoading || isLoadingDelete || isLoadingUpdate,
-    );
-  }, [isLoadingCreate, isLoading, isLoadingDelete, isLoadingUpdate]);
+      isLoadingCreate || isLoading || isLoadingDelete || isLoadingUpdate
+    )
+  }, [isLoadingCreate, isLoading, isLoadingDelete, isLoadingUpdate])
 
   useEffect(() => {
     if (data) {
-      setLoans(data.content);
-      setTotal(data.totalElements);
+      setLoans(data.content)
+      setTotal(data.totalElements)
     }
-  }, [data]);
+  }, [data])
 
   useEffect(() => {
     if (errorDelete) {
-      if ("status" in errorDelete) {
+      if ('status' in errorDelete) {
         dispatch(
           setMessage({
             text: (errorDelete?.data as BackError).msg,
-            type: "error",
-          }),
-        );
+            type: 'error'
+          })
+        )
       }
     }
-  }, [errorDelete, dispatch]);
+  }, [errorDelete, dispatch])
 
   useEffect(() => {
     if (error) {
-      dispatch(setMessage({ text: "Se ha producido un error", type: "error" }));
+      dispatch(setMessage({ text: 'Se ha producido un error', type: 'error' }))
     }
-  }, [error]);
+  }, [error])
 
   const createLoan = (loan: LoanModel) => {
-    setOpenCreate(false);
+    setOpenCreate(false)
     if (loan.id) {
       updateLoanApi(loan)
         .then((res) => {
-          setLoanToUpdate(null);
+          setLoanToUpdate(null)
           if (res.error?.status === 400) {
-            setText(res.error.data.message);
-            setOpen(true);
-            return;
+            setText(res.error.data.message)
+            setOpen(true)
+            return
           }
           dispatch(
             setMessage({
-              text: "Préstamo actualizado correctamente",
-              type: "ok",
-            }),
-          );
+              text: 'Préstamo actualizado correctamente',
+              type: 'ok'
+            })
+          )
         })
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err))
     } else {
       createLoanApi(loan)
         .then((res) => {
-          setLoanToUpdate(null);
+          setLoanToUpdate(null)
           if (res.error?.status === 400) {
-            setText(res.error.data.message);
-            setOpen(true);
-            return;
+            setText(res.error.data.message)
+            setOpen(true)
+            return
           }
           dispatch(
-            setMessage({ text: "Préstamo creado correctamente", type: "ok" }),
-          );
+            setMessage({ text: 'Préstamo creado correctamente', type: 'ok' })
+          )
         })
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err))
     }
-  };
+  }
 
   const deleteLoan = () => {
     deleteLoanApi(idToDelete)
       .then(() => {
-        setIdToDelete("");
+        setIdToDelete('')
       })
-      .catch((err) => console.log(err));
-  };
+      .catch((err) => console.log(err))
+  }
 
   return (
-    <div className="container">
+    <div className='container'>
       <h1>Listado de Préstamos</h1>
       <div className={styles.filter}>
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 220 }}>
+        <FormControl variant='standard' sx={{ m: 1, minWidth: 220 }}>
           <TextField
-            margin="dense"
-            id="game"
+            margin='dense'
+            id='game'
             select
-            label="Titulo del juego"
+            label='Titulo del juego'
             defaultValue="''"
             fullWidth
             value={titleFilter}
-            name="game"
-            variant="standard"
+            name='game'
+            variant='standard'
             onChange={(event) => setTitleFilter(event.target.value)}
           >
             {games &&
@@ -194,15 +193,15 @@ export const Loan = () => {
               ))}
           </TextField>
         </FormControl>
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 220 }}>
+        <FormControl variant='standard' sx={{ m: 1, minWidth: 220 }}>
           <TextField
-            id="client"
+            id='client'
             select
-            label="Cliente"
+            label='Cliente'
             defaultValue="''"
             fullWidth
-            variant="standard"
-            name="client"
+            variant='standard'
+            name='client'
             value={clientFilter}
             onChange={(event) => setClientFilter(event.target.value)}
           >
@@ -214,40 +213,40 @@ export const Loan = () => {
               ))}
           </TextField>
         </FormControl>
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 220 }}>
+        <FormControl variant='standard' sx={{ m: 1, minWidth: 220 }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              label="Fecha de solicitud"
-              value={dateFilter ? dateFilter : null}
-              format="DD/MM/YYYY"
-              onChange={(value) => setDateFilter(value ? value : null)}
+              label='Fecha de solicitud'
+              value={dateFilter || null}
+              format='DD/MM/YYYY'
+              onChange={(value) => setDateFilter(value || null)}
               slotProps={{
                 textField: {
                   fullWidth: true,
-                  margin: "dense",
-                  variant: "standard",
-                },
+                  margin: 'dense',
+                  variant: 'standard'
+                }
               }}
             />
           </LocalizationProvider>
         </FormControl>
         <Button
-          variant="outlined"
+          variant='outlined'
           onClick={() => {
-            setClientFilter("");
-            setTitleFilter("");
+            setClientFilter('')
+            setTitleFilter('')
           }}
         >
           Limpiar
         </Button>
       </div>
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+        <Table sx={{ minWidth: 500 }} aria-label='custom pagination table'>
           <TableHead
             sx={{
-              "& th": {
-                backgroundColor: "lightgrey",
-              },
+              '& th': {
+                backgroundColor: 'lightgrey'
+              }
             }}
           >
             <TableRow>
@@ -256,13 +255,13 @@ export const Loan = () => {
               <TableCell>Nombre del Cliente</TableCell>
               <TableCell>Fecha de Solicitud</TableCell>
               <TableCell>Fecha de Devolución</TableCell>
-              <TableCell align="right"></TableCell>
+              <TableCell align='right' />
             </TableRow>
           </TableHead>
           <TableBody>
             {loans.map((loan: LoanModel) => (
               <TableRow key={loan.id}>
-                <TableCell component="th" scope="row">
+                <TableCell component='th' scope='row'>
                   {loan.id}
                 </TableCell>
                 <TableCell style={{ width: 160 }}>{loan.game.title}</TableCell>
@@ -273,23 +272,23 @@ export const Loan = () => {
                 <TableCell style={{ width: 160 }}>
                   {new Date(loan.endDate).toLocaleDateString()}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align='right'>
                   <div className={styles.tableActions}>
                     <IconButton
-                      aria-label="update"
-                      color="primary"
+                      aria-label='update'
+                      color='primary'
                       onClick={() => {
-                        setLoanToUpdate(loan);
-                        setOpenCreate(true);
+                        setLoanToUpdate(loan)
+                        setOpenCreate(true)
                       }}
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
-                      aria-label="delete"
-                      color="error"
+                      aria-label='delete'
+                      color='error'
                       onClick={() => {
-                        setIdToDelete(loan.id);
+                        setIdToDelete(loan.id)
                       }}
                     >
                       <ClearIcon />
@@ -309,9 +308,9 @@ export const Loan = () => {
                 page={pageNumber}
                 SelectProps={{
                   inputProps: {
-                    "aria-label": "rows per page",
+                    'aria-label': 'rows per page'
                   },
-                  native: true,
+                  native: true
                 }}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
@@ -320,8 +319,8 @@ export const Loan = () => {
           </TableFooter>
         </Table>
       </TableContainer>
-      <div className="newButton">
-        <Button variant="contained" onClick={() => setOpenCreate(true)}>
+      <div className='newButton'>
+        <Button variant='contained' onClick={() => setOpenCreate(true)}>
           Nuevo préstamo
         </Button>
       </div>
@@ -329,27 +328,27 @@ export const Loan = () => {
         <CreateLoan
           create={createLoan}
           loan={loanToUpdate}
-          closeModal={() => {
-            setLoanToUpdate(null);
-            setOpenCreate(false);
+          handleCloseModal={() => {
+            setLoanToUpdate(null)
+            setOpenCreate(false)
           }}
         />
       )}
       {!!idToDelete && (
         <ConfirmDialog
-          title="Eliminar Préstamo"
-          text="Atención si borra el préstamo se perderán sus datos. ¿Desea eliminar el préstamo?"
+          title='Eliminar Préstamo'
+          text='Atención si borra el préstamo se perderán sus datos. ¿Desea eliminar el préstamo?'
           confirm={deleteLoan}
-          closeModal={() => setIdToDelete("")}
+          handleCloseModal={() => setIdToDelete('')}
         />
       )}
       {!!open && (
         <AlertDialog
-          title="Ha ocurrido un error"
+          title='Ha ocurrido un error'
           text={text}
-          closeModal={() => setOpen(false)}
+          handleCloseModal={() => setOpen(false)}
         />
       )}
     </div>
-  );
-};
+  )
+}

@@ -1,56 +1,56 @@
-import { useState } from "react";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import type { Category } from "../../../types/Category";
+import { useState } from 'react'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import type { Category } from '../../../types/Category'
 
 interface Props {
   category: Category | null;
-  closeModal: () => void;
+  handleCloseModal: () => void;
   create: (name: string) => void;
 }
 
-export default function CreateCategory(props: Props) {
-  const [name, setName] = useState(props?.category?.name || "");
+export default function CreateCategory (props: Props) {
+  const [name, setName] = useState(props?.category?.name || '')
 
   return (
     <div>
-      <Dialog open={true} onClose={props.closeModal}>
+      <Dialog open onClose={props.handleCloseModal}>
         <DialogTitle>
-          {props.category ? "Actualizar Categoría" : "Crear Categoría"}
+          {props.category ? 'Actualizar Categoría' : 'Crear Categoría'}
         </DialogTitle>
         <DialogContent>
           {props.category && (
             <TextField
-              margin="dense"
+              margin='dense'
               disabled
-              id="id"
-              label="Id"
+              id='id'
+              label='Id'
               fullWidth
               value={props.category.id}
-              variant="standard"
+              variant='standard'
             />
           )}
           <TextField
-            margin="dense"
-            id="name"
-            label="Nombre"
+            margin='dense'
+            id='name'
+            label='Nombre'
             fullWidth
-            variant="standard"
+            variant='standard'
             onChange={(event) => setName(event.target.value)}
             value={name}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.closeModal}>Cancelar</Button>
+          <Button onClick={props.handleCloseModal}>Cancelar</Button>
           <Button onClick={() => props.create(name)} disabled={!name}>
-            {props.category ? "Actualizar" : "Crear"}
+            {props.category ? 'Actualizar' : 'Crear'}
           </Button>
         </DialogActions>
       </Dialog>
     </div>
-  );
+  )
 }
