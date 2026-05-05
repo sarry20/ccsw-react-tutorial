@@ -10,9 +10,11 @@ interface Props {
   confirm: () => void;
   title: string;
   text: string;
+  idToDelete: string;
 }
 
 export const ConfirmDialog = (props: Props) => {
+  if (!props.idToDelete) return null
   return (
     <div>
       <Dialog open onClose={props.handleCloseModal}>

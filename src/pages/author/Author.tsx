@@ -9,10 +9,6 @@ import TableFooter from '@mui/material/TableFooter'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-import IconButton from '@mui/material/IconButton'
-import EditIcon from '@mui/icons-material/Edit'
-import ClearIcon from '@mui/icons-material/Clear'
-import styles from './Author.module.css'
 import CreateAuthor from './components/CreateAuthor'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { useAppDispatch } from '../../redux/hooks'
@@ -26,8 +22,9 @@ import {
   useUpdateAuthorMutation
 } from '../../redux/services/ludotecaApi'
 import { LoaderContext } from '../../context/LoaderProvider'
+import AuthorRow from './components/AuthorRow'
 
-export const Author = () => {
+export default function Author () {
   const [pageNumber, setPageNumber] = useState(0)
   const [pageSize, setPageSize] = useState(5)
   const [total, setTotal] = useState(0)
@@ -101,6 +98,15 @@ export const Author = () => {
     }
   }, [error])
 
+  const handleOpenEditModal = (props: {author: AuthorModel}) => {
+    setAuthorToUpdate(props.author)
+    setOpenCreate(true)
+  }
+
+  const handleOpenDeleteModal = (props: {idToDelete: string}) => {
+    setIdToDelete(props.idToDelete)
+  }
+
   const createAuthor = (author: AuthorModel) => {
     setOpenCreate(false)
     if (author.id) {
@@ -156,38 +162,12 @@ export const Author = () => {
           </TableHead>
           <TableBody>
             {authors.map((author: AuthorModel) => (
-              <TableRow key={author.id}>
-                <TableCell component='th' scope='row'>
-                  {author.id}
-                </TableCell>
-                <TableCell style={{ width: 160 }}>{author.name}</TableCell>
-                <TableCell style={{ width: 160 }}>
-                  {author.nationality}
-                </TableCell>
-                <TableCell align='right'>
-                  <div className={styles.tableActions}>
-                    <IconButton
-                      aria-label='update'
-                      color='primary'
-                      onClick={() => {
-                        setAuthorToUpdate(author)
-                        setOpenCreate(true)
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      aria-label='delete'
-                      color='error'
-                      onClick={() => {
-                        setIdToDelete(author.id)
-                      }}
-                    >
-                      <ClearIcon />
-                    </IconButton>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <AuthorRow
+                key={author.id}
+                author={author}
+                handleOpenDeleteModal={handleOpenDeleteModal}
+                handleOpenEditModal={handleOpenEditModal}
+              />
             ))}
           </TableBody>
           <TableFooter>
@@ -198,11 +178,13 @@ export const Author = () => {
                 count={total}
                 rowsPerPage={pageSize}
                 page={pageNumber}
-                SelectProps={{
-                  inputProps: {
-                    'aria-label': 'rows per page'
-                  },
-                  native: true
+                slotProps={{
+                  select: {
+                    inputProps: {
+                      'aria-label': 'rows per page'
+                    },
+                    native: true
+                  }
                 }}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
@@ -216,24 +198,25 @@ export const Author = () => {
           Nuevo autor
         </Button>
       </div>
-      {openCreate && (
-        <CreateAuthor
-          create={createAuthor}
-          author={authorToUpdate}
-          handleCloseModal={() => {
-            setAuthorToUpdate(null)
-            setOpenCreate(false)
-          }}
-        />
-      )}
-      {!!idToDelete && (
-        <ConfirmDialog
-          title='Eliminar Autor'
-          text='Atención si borra el autor se perderán sus datos. ¿Desea eliminar el autor?'
-          confirm={deleteAuthor}
-          handleCloseModal={() => setIdToDelete('')}
-        />
-      )}
+
+      <CreateAuthor
+        create={createAuthor}
+        author={authorToUpdate}
+        handleCloseModal={() => {
+          setAuthorToUpdate(null)
+          setOpenCreate(false)
+        }}
+        openCreate={openCreate}
+      />
+
+      <ConfirmDialog
+        title='Eliminar Autor'
+        text='Atención si borra el autor se perderán sus datos. ¿Desea eliminar el autor?'
+        confirm={deleteAuthor}
+        handleCloseModal={() => setIdToDelete('')}
+        idToDelete={idToDelete}
+      />
+
     </div>
   )
 }

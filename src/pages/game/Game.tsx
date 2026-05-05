@@ -18,7 +18,7 @@ import { setMessage } from '../../redux/features/manageSlice'
 import type { Game as GameModel } from '../../types/Game'
 import type { Category } from '../../types/Category'
 
-export const Game = () => {
+export default function Game () {
   const [openCreate, setOpenCreate] = useState(false)
   const [filterTitle, setFilterTitle] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
@@ -34,7 +34,7 @@ export const Game = () => {
   const [updateGameApi, { isLoading: isLoadingUpdate, error: errorUpdate }] =
     useUpdateGameMutation()
 
-  const { data: categories } = useGetCategoriesQuery(null)
+  const { data: categories, isLoading: isCategoriesLoading, isError: isCategoriesError } = useGetCategoriesQuery(null)
 
   const [createGameApi, { isLoading: isLoadingCreate, error: errorCreate }] =
     useCreateGameMutation()
@@ -54,7 +54,11 @@ export const Game = () => {
     }
   }, [errorUpdate, errorCreate])
 
-  if (error) return <p>Error cargando!!!</p>
+  useEffect(() => {
+    if (error) {
+      dispatch(setMessage({ text: 'Se ha producido un error', type: 'error' }))
+    }
+  }, [error])
 
   const createGame = (game: GameModel) => {
     setOpenCreate(false)
@@ -115,6 +119,12 @@ export const Game = () => {
             value={filterCategory}
             onChange={(event) => setFilterCategory(event.target.value)}
           >
+            {isCategoriesLoading && (
+              <MenuItem disabled>Loading...</MenuItem>
+            )}
+            {isCategoriesError && (
+              <MenuItem disabled>Error loading categories</MenuItem>
+            )}
             {categories &&
               categories.map((option: Category) => (
                 <MenuItem key={option.id} value={option.id}>
@@ -152,16 +162,15 @@ export const Game = () => {
           Nuevo juego
         </Button>
       </div>
-      {openCreate && (
-        <CreateGame
-          create={createGame}
-          game={gameToUpdate}
-          handleCloseModal={() => {
-            setGameToUpdate(null)
-            setOpenCreate(false)
-          }}
-        />
-      )}
+      <CreateGame
+        create={createGame}
+        game={gameToUpdate}
+        handleCloseModal={() => {
+          setGameToUpdate(null)
+          setOpenCreate(false)
+        }}
+        openCreate={openCreate}
+      />
     </div>
   )
 }

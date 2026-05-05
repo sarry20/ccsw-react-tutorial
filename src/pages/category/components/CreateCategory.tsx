@@ -11,9 +11,11 @@ interface Props {
   category: Category | null;
   handleCloseModal: () => void;
   create: (name: string) => void;
+  openCreate: boolean;
 }
 
 export default function CreateCategory (props: Props) {
+  if (!props.openCreate) return null
   const [name, setName] = useState(props?.category?.name || '')
 
   return (

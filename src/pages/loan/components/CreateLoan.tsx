@@ -9,7 +9,7 @@ import {
   useGetClientsQuery,
   useGetGamesQuery
 } from '../../../redux/services/ludotecaApi'
-import type { Loan } from '../../../types/Loan'
+import type Loan from '../../../types/Loan'
 import MenuItem from '@mui/material/MenuItem'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -20,6 +20,7 @@ interface Props {
   loan: Loan | null;
   handleCloseModal: () => void;
   create: (loan: Loan) => void;
+  openCreate: boolean;
 }
 
 interface LoanFormState {
@@ -51,6 +52,8 @@ const mapLoanToForm = (loan: Loan | null): LoanFormState => {
 }
 
 export default function CreateLoan (props: Props) {
+  if (!props.openCreate) return null
+
   const [form, setForm] = useState<LoanFormState>(() =>
     mapLoanToForm(props.loan)
   )

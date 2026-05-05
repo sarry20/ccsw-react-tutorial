@@ -19,6 +19,7 @@ interface Props {
   game: Game | null;
   handleCloseModal: () => void;
   create: (game: Game) => void;
+  openCreate: boolean;
 }
 
 const initialState = {
@@ -30,6 +31,8 @@ const initialState = {
 }
 
 export default function CreateGame (props: Props) {
+  if (!props.openCreate) return null
+
   const [form, setForm] = useState<Game>(initialState)
   const loader = useContext(LoaderContext)
   const { data: categories, isLoading: isLoadingCategories } =

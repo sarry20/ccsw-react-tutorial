@@ -9,9 +9,11 @@ interface Props {
   handleCloseModal: () => void;
   title: string;
   text: string;
+  open: boolean;
 }
 
 export const AlertDialog = (props: Props) => {
+  if (!props.open) return null
   return (
     <div>
       <Dialog open onClose={props.handleCloseModal}>

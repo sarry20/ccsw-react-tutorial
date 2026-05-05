@@ -1,13 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { Game } from './pages/Game/Game'
-import { Author } from './pages/Author/Author'
-import { Category } from './pages/Category/Category'
-import { Loan } from './pages/loan/Loan'
-import { Client } from './pages/client/Client'
 import { Layout } from './components/Layout'
 import { Provider } from 'react-redux'
 import { store } from './redux/store'
 import { LoaderProvider } from './context/LoaderProvider'
+import { lazy } from 'react'
+
+const LazyGame = lazy(() => import('./pages/game/Game.jsx'))
+const LazyCategory = lazy(() => import('./pages/category/Category.jsx'))
+const LazyAuthor = lazy(() => import('./pages/author/Author.jsx'))
+const LazyClient = lazy(() => import('./pages/client/Client.jsx'))
+const LazyLoan = lazy(() => import('./pages/loan/Loan.jsx'))
 
 function App () {
   return (
@@ -16,11 +18,11 @@ function App () {
         <BrowserRouter>
           <Routes>
             <Route element={<Layout />}>
-              <Route index path='games' element={<Game />} />
-              <Route path='categories' element={<Category />} />
-              <Route path='authors' element={<Author />} />
-              <Route path='clients' element={<Client />} />
-              <Route path='loans' element={<Loan />} />
+              <Route index path='games' element={<LazyGame />} />
+              <Route path='categories' element={<LazyCategory />} />
+              <Route path='authors' element={<LazyAuthor />} />
+              <Route path='clients' element={<LazyClient />} />
+              <Route path='loans' element={<LazyLoan />} />
               <Route path='*' element={<Navigate to='/games' />} />
             </Route>
           </Routes>

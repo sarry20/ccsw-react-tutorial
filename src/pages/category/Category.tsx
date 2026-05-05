@@ -6,10 +6,7 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
-import EditIcon from '@mui/icons-material/Edit'
-import ClearIcon from '@mui/icons-material/Clear'
-import IconButton from '@mui/material/IconButton'
-import styles from './Category.module.css'
+
 import type { Category as CategoryModel } from '../../types/Category'
 import { useState, useEffect, useContext } from 'react'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
@@ -22,11 +19,12 @@ import {
 } from '../../redux/services/ludotecaApi'
 
 import { setMessage } from '../../redux/features/manageSlice'
-import type { BackError } from '../../types/BackError'
 import { LoaderContext } from '../../context/LoaderProvider'
+import type { BackError } from '../../types/appTypes'
 import CreateCategory from './components/CreateCategory'
+import CategoryRow from './components/CategoryRow'
 
-export const Category = () => {
+export default function Category () {
   const [openCreate, setOpenCreate] = useState(false)
   const [categoryToUpdate, setCategoryToUpdate] =
     useState<CategoryModel | null>(null)
@@ -78,6 +76,15 @@ export const Category = () => {
     setCategoryToUpdate(null)
   }
 
+  const handleOpenEditModal = (props: {category: CategoryModel}) => {
+    setCategoryToUpdate(props.category)
+    setOpenCreate(true)
+  }
+
+  const handleOpenDeleteModal = (props: {idToDelete: string}) => {
+    setIdToDelete(props.idToDelete)
+  }
+
   const createCategory = (category: string) => {
     setOpenCreate(false)
     if (categoryToUpdate) {
@@ -103,7 +110,6 @@ export const Category = () => {
         .catch((err) => console.log(err))
     }
   }
-
   const deleteCategory = () => {
     deleteCategoryApi(idToDelete)
       .then(() => {
@@ -139,40 +145,12 @@ export const Category = () => {
           <TableBody>
             {data &&
               data.map((category: CategoryModel) => (
-                <TableRow
+                <CategoryRow
                   key={category.id}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component='th' scope='row'>
-                    {category.id}
-                  </TableCell>
-                  <TableCell component='th' scope='row'>
-                    {category.name}
-                  </TableCell>
-                  <TableCell>
-                    <div className={styles.tableActions}>
-                      <IconButton
-                        aria-label='update'
-                        color='primary'
-                        onClick={() => {
-                          setCategoryToUpdate(category)
-                          setOpenCreate(true)
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        aria-label='delete'
-                        color='error'
-                        onClick={() => {
-                          setIdToDelete(category.id)
-                        }}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                  category={category}
+                  handleOpenDeleteModal={handleOpenDeleteModal}
+                  handleOpenEditModal={handleOpenEditModal}
+                />
               ))}
           </TableBody>
         </Table>
@@ -182,21 +160,22 @@ export const Category = () => {
           Nueva categoría
         </Button>
       </div>
-      {openCreate && (
-        <CreateCategory
-          create={createCategory}
-          category={categoryToUpdate}
-          handleCloseModal={handleCloseCreate}
-        />
-      )}
-      {!!idToDelete && (
-        <ConfirmDialog
-          title='Eliminar categoría'
-          text='Atención si borra la categoría se perderán sus datos. ¿Desea eliminar la categoría?'
-          confirm={deleteCategory}
-          handleCloseModal={() => setIdToDelete('')}
-        />
-      )}
+
+      <CreateCategory
+        create={createCategory}
+        category={categoryToUpdate}
+        handleCloseModal={handleCloseCreate}
+        openCreate={openCreate}
+      />
+
+      <ConfirmDialog
+        title='Eliminar categoría'
+        text='Atención si borra la categoría se perderán sus datos. ¿Desea eliminar la categoría?'
+        confirm={deleteCategory}
+        handleCloseModal={() => setIdToDelete('')}
+        idToDelete={idToDelete}
+      />
+
     </div>
   )
 }

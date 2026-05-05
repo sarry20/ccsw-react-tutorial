@@ -9,9 +9,6 @@ import TableFooter from '@mui/material/TableFooter'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-import IconButton from '@mui/material/IconButton'
-import EditIcon from '@mui/icons-material/Edit'
-import ClearIcon from '@mui/icons-material/Clear'
 import styles from './Loan.module.css'
 import CreateLoan from './components/CreateLoan'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
@@ -33,8 +30,18 @@ import { FormControl, TextField, MenuItem } from '@mui/material'
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
+import LoanRow from './components/LoanRow'
 
-export const Loan = () => {
+interface Error {
+  data: {
+    status: string;
+    error: string;
+    message: string;
+    path: string;
+  }
+}
+
+export default function Loan () {
   const [pageNumber, setPageNumber] = useState(0)
   const [pageSize, setPageSize] = useState(5)
   const [titleFilter, setTitleFilter] = useState('')
@@ -76,9 +83,9 @@ export const Loan = () => {
     date: dateFilter ? dateFilter.toDate().toISOString() : undefined
   })
 
-  const { data: clients } = useGetClientsQuery(null)
+  const { data: clients, isLoading: isClientsLoading, isError: isClientsError } = useGetClientsQuery(null)
 
-  const { data: games } = useGetGamesQuery({
+  const { data: games, isLoading: isGamesLoading, isError: isGamesError } = useGetGamesQuery({
     title: '',
     idCategory: ''
   })
@@ -124,14 +131,24 @@ export const Loan = () => {
     }
   }, [error])
 
+  const handleOpenEditModal = (props: {loan: LoanModel}) => {
+    setLoanToUpdate(props.loan)
+    setOpenCreate(true)
+  }
+
+  const handleOpenDeleteModal = (props: {idToDelete: string}) => {
+    setIdToDelete(props.idToDelete)
+  }
+
   const createLoan = (loan: LoanModel) => {
     setOpenCreate(false)
     if (loan.id) {
       updateLoanApi(loan)
         .then((res) => {
           setLoanToUpdate(null)
-          if (res.error?.status === 400) {
-            setText(res.error.data.message)
+          if (res.error) {
+            const { data } = res.error as Error
+            setText(data.message)
             setOpen(true)
             return
           }
@@ -147,8 +164,9 @@ export const Loan = () => {
       createLoanApi(loan)
         .then((res) => {
           setLoanToUpdate(null)
-          if (res.error?.status === 400) {
-            setText(res.error.data.message)
+          if (res.error) {
+            const { data } = res.error as Error
+            setText(data.message)
             setOpen(true)
             return
           }
@@ -185,12 +203,18 @@ export const Loan = () => {
             variant='standard'
             onChange={(event) => setTitleFilter(event.target.value)}
           >
+            {isGamesLoading && (
+              <MenuItem disabled>Loading...</MenuItem>
+            )}
+            {isGamesError && (
+              <MenuItem disabled>Error loading categories</MenuItem>
+            )}
             {games &&
-              games.map((option) => (
-                <MenuItem key={option.id} value={option.title}>
-                  {option.title}
-                </MenuItem>
-              ))}
+               games.map((option) => (
+                 <MenuItem key={option.id} value={option.title}>
+                   {option.title}
+                 </MenuItem>
+               ))}
           </TextField>
         </FormControl>
         <FormControl variant='standard' sx={{ m: 1, minWidth: 220 }}>
@@ -205,6 +229,12 @@ export const Loan = () => {
             value={clientFilter}
             onChange={(event) => setClientFilter(event.target.value)}
           >
+            {isClientsLoading && (
+              <MenuItem disabled>Loading...</MenuItem>
+            )}
+            {isClientsError && (
+              <MenuItem disabled>Error loading categories</MenuItem>
+            )}
             {clients &&
               clients.map((option) => (
                 <MenuItem key={option.id} value={option.id}>
@@ -260,42 +290,12 @@ export const Loan = () => {
           </TableHead>
           <TableBody>
             {loans.map((loan: LoanModel) => (
-              <TableRow key={loan.id}>
-                <TableCell component='th' scope='row'>
-                  {loan.id}
-                </TableCell>
-                <TableCell style={{ width: 160 }}>{loan.game.title}</TableCell>
-                <TableCell style={{ width: 160 }}>{loan.client.name}</TableCell>
-                <TableCell style={{ width: 160 }}>
-                  {new Date(loan.startDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell style={{ width: 160 }}>
-                  {new Date(loan.endDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell align='right'>
-                  <div className={styles.tableActions}>
-                    <IconButton
-                      aria-label='update'
-                      color='primary'
-                      onClick={() => {
-                        setLoanToUpdate(loan)
-                        setOpenCreate(true)
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      aria-label='delete'
-                      color='error'
-                      onClick={() => {
-                        setIdToDelete(loan.id)
-                      }}
-                    >
-                      <ClearIcon />
-                    </IconButton>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <LoanRow
+                key={loan.id}
+                loan={loan}
+                handleOpenDeleteModal={handleOpenDeleteModal}
+                handleOpenEditModal={handleOpenEditModal}
+              />
             ))}
           </TableBody>
           <TableFooter>
@@ -306,11 +306,13 @@ export const Loan = () => {
                 count={total}
                 rowsPerPage={pageSize}
                 page={pageNumber}
-                SelectProps={{
-                  inputProps: {
-                    'aria-label': 'rows per page'
-                  },
-                  native: true
+                slotProps={{
+                  select: {
+                    inputProps: {
+                      'aria-label': 'rows per page'
+                    },
+                    native: true
+                  }
                 }}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
@@ -324,31 +326,32 @@ export const Loan = () => {
           Nuevo préstamo
         </Button>
       </div>
-      {openCreate && (
-        <CreateLoan
-          create={createLoan}
-          loan={loanToUpdate}
-          handleCloseModal={() => {
-            setLoanToUpdate(null)
-            setOpenCreate(false)
-          }}
-        />
-      )}
-      {!!idToDelete && (
-        <ConfirmDialog
-          title='Eliminar Préstamo'
-          text='Atención si borra el préstamo se perderán sus datos. ¿Desea eliminar el préstamo?'
-          confirm={deleteLoan}
-          handleCloseModal={() => setIdToDelete('')}
-        />
-      )}
-      {!!open && (
-        <AlertDialog
-          title='Ha ocurrido un error'
-          text={text}
-          handleCloseModal={() => setOpen(false)}
-        />
-      )}
+
+      <CreateLoan
+        create={createLoan}
+        loan={loanToUpdate}
+        handleCloseModal={() => {
+          setLoanToUpdate(null)
+          setOpenCreate(false)
+        }}
+        openCreate={openCreate}
+      />
+
+      <ConfirmDialog
+        title='Eliminar Préstamo'
+        text='Atención si borra el préstamo se perderán sus datos. ¿Desea eliminar el préstamo?'
+        confirm={deleteLoan}
+        handleCloseModal={() => setIdToDelete('')}
+        idToDelete={idToDelete}
+      />
+
+      <AlertDialog
+        title='Ha ocurrido un error'
+        text={text}
+        handleCloseModal={() => setOpen(false)}
+        open={open}
+      />
+
     </div>
   )
 }

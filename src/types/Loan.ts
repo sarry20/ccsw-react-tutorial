@@ -1,5 +1,5 @@
-import type { Game } from './Game'
-import type { Client } from './Client'
+import type Game from './Game'
+import type Client from './Client'
 
 export interface Loan {
   id: string;

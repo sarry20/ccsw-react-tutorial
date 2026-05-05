@@ -11,9 +11,12 @@ interface Props {
   client: Client | null;
   handleCloseModal: () => void;
   create: (name: string) => void;
+  openCreate: boolean;
 }
 
 export default function CreateClient (props: Props) {
+  if (!props.openCreate) return null
+
   const [name, setName] = useState(props?.client?.name || '')
 
   return (

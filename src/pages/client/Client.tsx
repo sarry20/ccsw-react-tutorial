@@ -6,10 +6,7 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
-import EditIcon from '@mui/icons-material/Edit'
-import ClearIcon from '@mui/icons-material/Clear'
-import IconButton from '@mui/material/IconButton'
-import styles from './Client.module.css'
+
 import type { Client as ClientModel } from '../../types/Client'
 import { useState, useEffect, useContext } from 'react'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
@@ -22,12 +19,13 @@ import {
 } from '../../redux/services/ludotecaApi'
 
 import { setMessage } from '../../redux/features/manageSlice'
-import type { BackError } from '../../types/BackError'
 import { LoaderContext } from '../../context/LoaderProvider'
 import CreateClient from './components/CreateClient'
 import { AlertDialog } from '../../components/AlertDialog'
+import type { BackError } from '../../types/appTypes'
+import ClientRow from './components/ClientRow'
 
-export const Client = () => {
+export default function Client () {
   const [openCreate, setOpenCreate] = useState(false)
   const [clientToUpdate, setClientToUpdate] = useState<ClientModel | null>(
     null
@@ -79,13 +77,22 @@ export const Client = () => {
     setClientToUpdate(null)
   }
 
+  const handleOpenEditModal = (props: {client: ClientModel}) => {
+    setClientToUpdate(props.client)
+    setOpenCreate(true)
+  }
+
+  const handleOpenDeleteModal = (props: {idToDelete: string}) => {
+    setIdToDelete(props.idToDelete)
+  }
+
   const createClient = (client: string) => {
     setOpenCreate(false)
     if (clientToUpdate) {
       updateClientApi({ id: clientToUpdate.id, name: client })
         .then((res) => {
           setClientToUpdate(null)
-          if (res.error?.status === 500) {
+          if (res.error) {
             setOpen(true)
             return
           }
@@ -101,7 +108,7 @@ export const Client = () => {
       createClientApi({ name: client })
         .then((res) => {
           setClientToUpdate(null)
-          if (res.error?.status === 500) {
+          if (res.error) {
             setOpen(true)
             return
           }
@@ -148,40 +155,12 @@ export const Client = () => {
           <TableBody>
             {data &&
               data.map((client: ClientModel) => (
-                <TableRow
+                <ClientRow
                   key={client.id}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component='th' scope='row'>
-                    {client.id}
-                  </TableCell>
-                  <TableCell component='th' scope='row'>
-                    {client.name}
-                  </TableCell>
-                  <TableCell>
-                    <div className={styles.tableActions}>
-                      <IconButton
-                        aria-label='update'
-                        color='primary'
-                        onClick={() => {
-                          setClientToUpdate(client)
-                          setOpenCreate(true)
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        aria-label='delete'
-                        color='error'
-                        onClick={() => {
-                          setIdToDelete(client.id)
-                        }}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                  client={client}
+                  handleOpenEditModal={handleOpenEditModal}
+                  handleOpenDeleteModal={handleOpenDeleteModal}
+                />
               ))}
           </TableBody>
         </Table>
@@ -191,28 +170,29 @@ export const Client = () => {
           Nuevo cliente
         </Button>
       </div>
-      {openCreate && (
-        <CreateClient
-          create={createClient}
-          client={clientToUpdate}
-          handleCloseModal={handleCloseCreate}
-        />
-      )}
-      {!!idToDelete && (
-        <ConfirmDialog
-          title='Eliminar cliente'
-          text='Atención si borra el cliente se perderán sus datos. ¿Desea eliminar el cliente?'
-          confirm={deleteClient}
-          handleCloseModal={() => setIdToDelete('')}
-        />
-      )}
-      {!!open && (
-        <AlertDialog
-          title='Ha ocurrido un error'
-          text='El cliente está duplicado'
-          handleCloseModal={() => setOpen(false)}
-        />
-      )}
+
+      <CreateClient
+        create={createClient}
+        client={clientToUpdate}
+        handleCloseModal={handleCloseCreate}
+        openCreate={openCreate}
+      />
+
+      <ConfirmDialog
+        title='Eliminar cliente'
+        text='Atención si borra el cliente se perderán sus datos. ¿Desea eliminar el cliente?'
+        confirm={deleteClient}
+        handleCloseModal={() => setIdToDelete('')}
+        idToDelete={idToDelete}
+      />
+
+      <AlertDialog
+        title='Ha ocurrido un error'
+        text='El cliente está duplicado'
+        handleCloseModal={() => setOpen(false)}
+        open={open}
+      />
+
     </div>
   )
 }

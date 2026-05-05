@@ -148,7 +148,7 @@ export const ludotecaAPI = createApi({
       }),
       invalidatesTags: ['Client']
     }),
-    getLoans: builder.query<LoanResponse, { pageNumber: number; pageSize: number, title: string, client: string, date: string }>({
+    getLoans: builder.query<LoanResponse, { pageNumber: number; pageSize: number, title: string, client: string, date: string | undefined }>({
       query: ({ pageNumber, pageSize, title, client, date }) => {
         return {
           url: 'loan',

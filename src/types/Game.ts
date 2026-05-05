@@ -1,5 +1,5 @@
-import type { Category } from './Category'
-import type { Author } from './Author'
+import type Category from './Category'
+import type Author from './Author'
 
 export interface Game {
   id: string;
